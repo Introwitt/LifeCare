@@ -42,7 +42,7 @@ class HomeState extends State<Home>{
   }
   @override
     void initState() {
-      // TODO: implement initState
+      // TODO: implement initstate
       super.initState();
       _email = user.email ;
       _id = user.uid ;
