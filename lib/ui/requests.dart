@@ -42,7 +42,7 @@ class RequestsState extends State<Requests>{
         elevation: defaultTargetPlatform == TargetPlatform.android ? 5.0:0.0 ,
       ),
       body: new StreamBuilder<QuerySnapshot>(
-        stream: collectionReference.snapshots(),
+        stream: Firestore.instance.collection("request").where("to",isEqualTo: myid).snapshots(),
         builder: (BuildContext context,AsyncSnapshot<QuerySnapshot> snapshot){
           if(!snapshot.hasData){
             return new Center(
@@ -54,9 +54,7 @@ class RequestsState extends State<Requests>{
           return new ListView.builder(
             itemCount: count,
             itemBuilder: (_,index){
-              final DocumentSnapshot document = snapshot.data.documents[count-index-1];
-                if(document['to']==myid)
-                { 
+              final DocumentSnapshot document = snapshot.data.documents[count-index-1];                 
                   return new Card(
                     child: new ListTile(
                     title: new Text("${document['animal']}"),
@@ -104,9 +102,7 @@ class RequestsState extends State<Requests>{
                     },   
                     ),
                   );
-                }else{
-                  return new Container();
-                }
+                
             },
           );
         },

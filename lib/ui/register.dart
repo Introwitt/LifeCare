@@ -45,6 +45,7 @@ class RegisterPageState extends State<RegisterPage>{
                                   "email" : _email,
                                   "id" : _id,
                                   "name" : _name ,
+                                  "image" : null,
                                    };
                                reference.setData(data).whenComplete((){
                                   print("Document Added");

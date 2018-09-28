@@ -1,16 +1,19 @@
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:vcareanimal/main.dart';
 import 'package:vcareanimal/ui/add.dart';
 import 'package:vcareanimal/ui/login_page.dart';
 import 'package:vcareanimal/ui/my_posts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
-
 import 'package:vcareanimal/ui/post.dart';
 import 'package:vcareanimal/ui/requests.dart';
+import 'dart:io';
 
+String image ;
 
 class Home extends StatefulWidget{
   FirebaseUser user;
@@ -25,6 +28,33 @@ class Home extends StatefulWidget{
 
 class HomeState extends State<Home>{
   FirebaseUser user;
+
+  void picker() async{
+    print("picker called");
+    File img;
+    img = await ImagePicker.pickImage(source: ImageSource.gallery);
+    if(img!=null){
+      String preimg;
+      final StorageReference reference = FirebaseStorage.instance.ref().child(user.uid);
+      final StorageUploadTask uploadTask = reference.putFile(img);
+      final Uri downloadUrl = (await uploadTask.future).downloadUrl;
+      image=downloadUrl.toString();
+      if(_image!=null){ 
+        preimg=_image;
+       }
+      DocumentReference documentReference = Firestore.instance.collection("user").document(user.uid);
+      Map<String,dynamic> data = <String,dynamic> {
+        "email" : user.email,
+        "id" : user.uid,
+        "name" : _name,
+        "image" : image
+      };
+      _image=image;
+      documentReference.updateData(data);
+      setState(() {});
+    }
+  }
+
   void _signout() async{
      await FirebaseAuth.instance.signOut();
      runApp(new MyApp());
@@ -34,15 +64,17 @@ class HomeState extends State<Home>{
   String _email="your email" ;
   String _id;
   String _name="your name" ;
+  String _image ;
   Future _namer() async{
     DocumentReference documentReference = Firestore.instance.collection("user").document(_id);
     documentReference.get().then((snapshot){  setState(() {
            _name=snapshot.data['name'];
+           _image=snapshot.data['image'];
         }); print(_name); });
   }
   @override
     void initState() {
-      // TODO: implement initstate
+      // TODO: implement initState
       super.initState();
       _email = user.email ;
       _id = user.uid ;
@@ -55,7 +87,7 @@ class HomeState extends State<Home>{
     // TODO: implement build
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text("Animal Vcare",style: new TextStyle(color: Colors.white),),
+        title: new Text("Pro Life",style: new TextStyle(color: Colors.white),),
         elevation: defaultTargetPlatform == TargetPlatform.android ? 5.0:0.0 ,
       ),
       
@@ -65,11 +97,13 @@ class HomeState extends State<Home>{
              UserAccountsDrawerHeader(
                accountEmail: new Text(_email,style: new TextStyle(color: Colors.white),),
                accountName: new Text(_name,style: new TextStyle(color: Colors.white)),
-               currentAccountPicture: new CircleAvatar(
-                 child: new Text("${_name[0]}${_name[1]}",style: new TextStyle(fontWeight: FontWeight.bold,fontSize: 30.0)),
-                 backgroundColor: Colors.yellow,
-                 foregroundColor: Colors.white,
-               ),
+               currentAccountPicture: new GestureDetector(
+                     child: 
+                    //  _image==null ? 
+                     new Image.asset('img/user.png'), 
+                    //  : new Image.network(_image),
+                     onTap: (){ picker(); },
+                   ),
              ),
              new ListTile( title: new Text("My Posts"), onTap: () {  Navigator.of(context).pop(context); Navigator.of(context).push(new MaterialPageRoute( builder: (BuildContext context) => new MyPosts(user) )); }, trailing: new Icon(Icons.account_box),),
              new ListTile( title: new Text("Add Post"), onTap: () { Navigator.of(context).pop(context); Navigator.of(context).push(new MaterialPageRoute(  builder: (BuildContext context) => new AddPost(user) )); } ,trailing: new Icon(Icons.add),),
@@ -78,7 +112,6 @@ class HomeState extends State<Home>{
                 // Navigator.of(context).push( new MaterialPageRoute(builder: (BuildContext context) => new LoginPage()) ); 
                 _signout();
                  }, ),
-             
            ],
          ),
       ),
@@ -113,6 +146,10 @@ class HomeState extends State<Home>{
                 if(document['animal']=="chick"||document['animal']=="Chick") img="chick.png"; else
                 if(document['animal']=="Hen"||document['animal']=="hen") img="chick.png"; else
                 if(document['animal']=="chicken"||document['animal']=="Chicken") img="chick.png"; else
+                if(document['animal']=="child"||document['animal']=="Child") img="face.png"; else
+                if(document['animal']=="girl"||document['animal']=="Girl") img="face.png"; else
+                if(document['animal']=="Boy"||document['animal']=="boy") img="face.png"; else
+                if(document['animal']=="human"||document['animal']=="Human") img="face.png"; else
                 if(document['animal']=="snake"||document['animal']=="Snake") img="snake.png"; else{ img="ambulance.png" ; }
                 
                 return Card(
@@ -123,8 +160,30 @@ class HomeState extends State<Home>{
                   title: new Text(document['animal']),
                    subtitle: new Text(document['description']),
                    onTap: (){
-                     Navigator.of(context).push(new MaterialPageRoute(
-                          builder: (BuildContext context) => new Post(document.documentID,_id)));
+                     var location;
+                     var animal,to,from;
+                     var content;
+                     var url;
+                     DateTime dateTime;
+                     var email;
+                     DocumentReference documentReference = Firestore.instance.collection("post").document(document.documentID);
+                     documentReference.get().then((snapshot){
+                       if(snapshot.exists){
+                         location=snapshot['location'];
+                         animal=snapshot['animal'];
+                         content=snapshot['description'];
+                         from=user.uid;
+                         url=snapshot['url'];
+                         to=snapshot['id'];
+                         dateTime=snapshot['date'];
+                         email=user.email;
+                       }
+                     }).whenComplete((){
+                       print("object: $animal $content ${location['latitude']} $from $url $to $dateTime $email");
+                       Navigator.of(context).push(new MaterialPageRoute(
+                          builder: (BuildContext context) => new Post(from,to,animal,content,dateTime,location,email,url)));
+                         
+                     });
                    },
               ),
                 );

@@ -7,7 +7,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
-DateTime dateTime;
+// bool fetched = false ;
+
+bool shelp;
+var _help = new TextEditingController();
+class Post extends StatefulWidget{
+  String id;
+  String from;
+  DateTime dateTime;
 String _content;
 String _email;
 String _animal;
@@ -17,23 +24,30 @@ String url;
 String to;
 var stream;
 var day,month,year,hour,minute;
-var _help = new TextEditingController();
-class Post extends StatefulWidget{
-  String id;
-  String from;
-  Post(this.id,this.from);
+  Post(this.from,this.to,this._animal,this._content,this.dateTime,this._location,this._email,this.url);
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return new PostState(id,from);
+    return new PostState(from,to,_animal,_content,dateTime,_location,_email,url);
   }
 
 }
 String did;
 class PostState extends State<Post>{
+  DateTime dateTime;
+String from;
+String _content;
+String _email;
+String _animal;
+var _location;
+var _image;
+String url;
+String to;
+var stream;
+var day,month,year,hour,minute;
   String _id;
   String _from;
-  PostState(this._id,this._from);
+  PostState(this.from,this.to,this._animal,this._content,this.dateTime,this._location,this._email,this.url);
   DocumentReference document = Firestore.instance.collection("post").document(did);
   Future _helper() async{
     DocumentReference ref = Firestore.instance.collection("request").document();
@@ -45,48 +59,81 @@ class PostState extends State<Post>{
                                   "date" : DateTime.now(),
                                   "email" : _email,
                                   "animal" : _animal,
-                                  "posttime" : "$day-$month-$year,$hour:$minute",
+                                  "posttime" : "${dateTime.day}-${dateTime.month}-${dateTime.year},${dateTime.hour}:${dateTime.minute}",
                                    };
                                    ref.setData(data).whenComplete((){
                                      print("request sent");
                                      Navigator.of(context).pop();
                                    });
   }
-  Future poster() async {
-      document.get().then((snapshot)async {
-      print(snapshot.data['date']);
-      print(snapshot.data['description']);
-      setState(() {
-      dateTime=snapshot.data['date'];
-      day=dateTime.day;
-      month=dateTime.month;
-      year=dateTime.year;
-      hour=dateTime.hour;
-      minute=dateTime.minute;
-      _content=snapshot.data['description'];
-      _animal=snapshot.data['animal'];
-      _location=snapshot.data['location'];
-      to=snapshot.data['id'];
-      _email=snapshot.data['email'];
-      _image=snapshot.data['imagename'];
-      url=snapshot.data['url'];      
-            });
-      print(url);
-      print(to);
-      print(_from);
-    });
-  }
+  // void poster() {
+  //   //   document.get().then((snapshot)async {
+  //   //   print(snapshot.data['date']);
+  //   //   print(snapshot.data['description']);
+  //   //   setState(() {
+  //   //   dateTime=snapshot.data['date'];
+  //   //   day=dateTime.day;
+  //   //   month=dateTime.month;
+  //   //   year=dateTime.year;
+  //   //   hour=dateTime.hour;
+  //   //   minute=dateTime.minute;
+  //   //   _content=snapshot.data['description'];
+  //   //   _animal=snapshot.data['animal'];
+  //   //   _location=snapshot.data['location'];
+  //   //   to=snapshot.data['id'];
+  //   //   _email=snapshot.data['email'];
+  //   //   _image=snapshot.data['imagename'];
+  //   //   url=snapshot.data['url'];      
+  //   //         });
+  //   //   print(url);
+  //   //   print(to);
+  //   //   fetched = true;
+  //   //   print(_from);
+  //   // });
+
+  // document.get().then((snapshot){
+  //   if(snapshot.exists){
+  //     print("ref cor. ${snapshot['animal']}");
+  //     setState(() {
+  //     dateTime=snapshot['date'];
+  //     day=dateTime.day;
+  //     month=dateTime.month;
+  //     year=dateTime.year;
+  //     hour=dateTime.hour;
+  //     minute=dateTime.minute;
+  //     _content=snapshot['description'];
+  //     _animal=snapshot['animal'];
+  //     _location=snapshot['location'];
+  //     to=snapshot['id'];
+  //     _email=snapshot['email'];
+  //     _image=snapshot['imagename'];
+  //     url=snapshot['url'];      
+  //           });
+  //   }
+  // }).whenComplete((){
+  //   setState(() {});
+  //   print("fetching complete");
+  //   print(_animal);
+  // });
+
+  // }
   @override
     void initState() {
       // TODO: implement initState
       super.initState();
       did=_id;
       print(_id);
-      poster();
+      if(to.toString()==from.toString()){
+        shelp=false;
+      }else {
+        shelp=true;
+      }
+      //  poster();
     }
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
+    Future.delayed(Duration(seconds: 4),(){    setState(() {});   });
     return new Scaffold(
       appBar: new AppBar(
         title: new Text("Details",style: new TextStyle(color: Colors.white)),
@@ -97,28 +144,30 @@ class PostState extends State<Post>{
         children: <Widget>[
           _animal==null ? new Container() :new Text("$_animal",style: new TextStyle(fontWeight: FontWeight.bold,fontSize: 30.0,color: Colors.grey),),
           new Padding(padding: const EdgeInsets.only(top: 20.0),),
-          dateTime==null? new Container() : new Text("Added on:$day-$month-$year,$hour:$minute"),
+          dateTime==null? new Container() : new Text("Added on:${dateTime.day}-${dateTime.month}-${dateTime.year},${dateTime.hour}:${dateTime.minute}"),
           new Padding(padding: const EdgeInsets.only(top: 20.0),),
-          _image==null ? new Container() : new Image.network(url),
+          url==null ? new Container() : new Image.network(url),
           new Padding(padding: const EdgeInsets.only(top: 20.0),),
           _content==null? new Container() : new Text("$_content"),
           new Padding(padding: const EdgeInsets.only(top: 20.0),),
-          _location!=null ? new Image.network(
-            "https://maps.googleapis.com/maps/api/staticmap?center=${_location['latitude']},${_location["longitude"]}&zoom=18&size=640x400&key=AIzaSyCmkGQq9xB7Tp2oetbbMJiqeZFEokiPqDY") : new Center( child: new CircularProgressIndicator( backgroundColor: Colors.orange,), ),
+          _location!=null ? 
+          // new Image.network(
+          //   "https://maps.googleapis.com/maps/api/staticmap?center=${_location["latitude"]},${_location["longitude"]}&zoom=18&size=640x400&key=AIzaSyARjFlTh4-8KVvpsCyP63i7BMTKNseo57Y") 
+           new Text("latitude: ${_location["latitude"]} \n longitude: ${_location["longitude"]}") : new Center( child: new CircularProgressIndicator( backgroundColor: Colors.orange,), ),
           new Padding(padding: const EdgeInsets.only(top: 20.0),),
-          to!=_from ? new Text("Want to help ? Enter your message for the publisher .") : new Container(),
-          to!=_from ? new TextField(
+          shelp ? new Text("Want to help ? Enter your message for the publisher .") : new Text(""),
+          shelp ? new TextField(
              decoration: new InputDecoration(
-               hintText: "Enter here.."
+               hintText: "Enter here..\n(Make sure to provide your phone number)"
              ),
              maxLines: 6,
              controller: _help,
           ): new Container(),
           new Padding(padding: const EdgeInsets.only(top: 20.0),),
-          to!=_from ?
+          shelp ?
           Container(
            child: new MaterialButton(
-              child: new Text("Help animal"),
+              child: new Text("save life"),
               color: Colors.orange,
               textColor: Colors.white,
               onPressed: (){
@@ -155,3 +204,4 @@ class PostState extends State<Post>{
   }
 
 }
+

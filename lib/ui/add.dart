@@ -15,6 +15,7 @@ var lat,lang;
 var location = new Location();
 Uri imguri;
 var imgname ;
+bool uploaded=false ;
 var url;
 
 class AddPost extends StatefulWidget {
@@ -53,6 +54,8 @@ class AddPostState extends State<AddPost>{
          }
     }
   }
+  
+  
   void imageadder() async{
     final String rand1 = "${new Random().nextInt(10000)}";
     final String rand2 = "${new Random().nextInt(10000)}";
@@ -64,6 +67,7 @@ class AddPostState extends State<AddPost>{
     imguri=downloadUrl;
     url=imguri.toString();
     print(imguri);
+    uploaded=true;
     setState(() {});
   }
   void _add(DateTime d,String id,String email,String animal,String description) {
@@ -81,7 +85,7 @@ class AddPostState extends State<AddPost>{
   }
   void _loc() async{
     try{
-        currentLocation = await location.getLocation() ;
+        currentLocation = await location.getLocation();
        
         lat=currentLocation['latitude'];
         lang=currentLocation['longitude'];
@@ -132,10 +136,10 @@ class AddPostState extends State<AddPost>{
                           children: <Widget>[
                             new TextFormField(
                                 decoration: new InputDecoration(
-                                  hintText: "Ex. Cow,Dog etc.",
-                                  labelText: "Enter Animal",
+                                  hintText: "Ex. Child,Cow,Dog etc.",
+                                  labelText: "Enter Category",
                                 ),
-                                validator: (value) => value.isEmpty ? 'Please Enter animal' : null,
+                                validator: (value) => value.isEmpty ? 'Please Enter category' : null,
                                 onSaved: (value) => _animal=value,
                               ),
                               new TextFormField(
@@ -158,7 +162,7 @@ class AddPostState extends State<AddPost>{
                    (image!=null)&&(imguri==null) ? new Text("Uploading image , Do not press any button please wait...") :  
                     new Container(
                       child: new MaterialButton(
-                      child: new Text("Help animal",style: new TextStyle(color: Colors.white),),
+                      child: new Text("save life",style: new TextStyle(color: Colors.white),),
                       color: Colors.orange,
                       onPressed: () {
                         _date = DateTime.now();
@@ -177,7 +181,7 @@ class AddPostState extends State<AddPost>{
                     ),
                   ) ,
                   new Padding( padding: const EdgeInsets.only(top: 20.0), ),
-                  
+                 uploaded==true ?  new Text("image uploaded") : new Text("tap on camera to upload image from camera"),
               ],
             ),
           ),
