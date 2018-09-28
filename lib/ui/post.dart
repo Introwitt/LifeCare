@@ -151,9 +151,10 @@ var day,month,year,hour,minute;
           _content==null? new Container() : new Text("$_content"),
           new Padding(padding: const EdgeInsets.only(top: 20.0),),
           _location!=null ? 
-          // new Image.network(
-          //   "https://maps.googleapis.com/maps/api/staticmap?center=${_location["latitude"]},${_location["longitude"]}&zoom=18&size=640x400&key=AIzaSyARjFlTh4-8KVvpsCyP63i7BMTKNseo57Y") 
-           new Text("latitude: ${_location["latitude"]} \n longitude: ${_location["longitude"]}") : new Center( child: new CircularProgressIndicator( backgroundColor: Colors.orange,), ),
+          new Image.network(
+            "https://maps.googleapis.com/maps/api/staticmap?center=${_location["latitude"]},${_location["longitude"]}&zoom=15&size=400x400&markers=color:blue%7Clabel:S%7C${_location["latitude"]},${_location["longitude"]}&key=AIzaSyCJ3e_FUmjtI-MWmQqHpzukVSqOLevR_6M") 
+            : new Center( child: new CircularProgressIndicator( backgroundColor: Colors.orange,), ),
+          new Text("latitude: ${_location["latitude"]} \n longitude: ${_location["longitude"]}"),
           new Padding(padding: const EdgeInsets.only(top: 20.0),),
           shelp ? new Text("Want to help ? Enter your message for the publisher .") : new Text(""),
           shelp ? new TextField(
@@ -205,3 +206,6 @@ var day,month,year,hour,minute;
 
 }
 
+// "https://maps.googleapis.com/maps/api/staticmap?center=${_location["latitude"]},${_location["longitude"]}&zoom=12&size=400x400&key=AIzaSyCJ3e_FUmjtI-MWmQqHpzukVSqOLevR_6M"
+
+// "https://maps.googleapis.com/maps/api/staticmap?center=${_location["latitude"]},${_location["longitude"]}&zoom=6&size=400x400&markers=color:blue%7Clabel:S%7C${_location["latitude"]},${_location["longitude"]}&key=AIzaSyCJ3e_FUmjtI-MWmQqHpzukVSqOLevR_6M"
